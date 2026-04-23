@@ -1,0 +1,15 @@
+{
+  "version": "1.0",
+  "servers": [
+    {
+      "id": "atlassian-confluence",
+      "name": "Atlassian Confluence MCP",
+      "description": "Official Atlassian MCP for Confluence",
+      "type": "http",
+      "url": "https://mcp.atlassian.com",
+      "auth": {
+        "type": "oauth"
+      }
+    }
+  ]
+}
