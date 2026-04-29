@@ -24,24 +24,19 @@ This registry is referenced from **GitHub Organization → Copilot settings**, w
 
 ## How it works
 
-The registry exposes a single endpoint that GitHub Copilot queries to enforce the allow-list:
+The registry is served via **GitHub Pages** from this repository. GitHub Copilot queries a single endpoint to enforce the allow-list:
 
-| Endpoint | Source file |
+| Endpoint | File |
 |---|---|
-| `GET /v0.1/servers` | `v0.1/servers-list.json` |
+| `GET /v0.1/servers` | `v0.1/servers` |
 
-URL rewriting (configured in `staticwebapp.config.json` or `_redirects`) maps the API path to the static JSON file.
-
----
+The file `v0.1/servers` is a JSON file with no extension, served by GitHub Pages at the exact URL path Copilot expects.
 
 ## Hosting and deployment
 
-The registry must be served over HTTPS with CORS headers. Two hosting configurations are included:
+Served via **GitHub Pages** at `https://elseab.github.io/mcp-registry`.
 
-- **Azure Static Web Apps** — uses `staticwebapp.config.json` (recommended for Microsoft/Azure environments)
-- **Netlify** — uses `_redirects`
-
-Configure the GitHub Copilot organization policy to point to the base URL of the deployed site (e.g. `https://your-registry.azurestaticapps.net`). Do **not** include the `/v0.1/servers` path suffix — Copilot appends this automatically.
+Configure the GitHub Copilot organization policy to point to the base URL — do **not** include the `/v0.1/servers` suffix, Copilot appends it automatically.
 
 ---
 
@@ -63,9 +58,7 @@ The current registry intentionally contains a **minimal set** of MCP servers.
 
 ```
 v0.1/
-  servers-list.json          ← GET /v0.1/servers
-staticwebapp.config.json     ← Azure SWA routing + CORS headers
-_redirects                   ← Netlify routing rules
+  servers          ← GET /v0.1/servers (JSON file, no extension)
 ```
 
 ---
@@ -102,7 +95,7 @@ Recommended practices:
 
 ## Adding a new MCP server
 
-1. Add the server entry to `v0.1/servers-list.json` under the `servers` array and increment `metadata.count`
+1. Add the server entry to `v0.1/servers` under the `servers` array and increment `metadata.count`
 2. Open a pull request including:
    - Purpose of the MCP server
    - Data accessed

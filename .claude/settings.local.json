@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "WebFetch(domain:docs.github.com)",
-      "WebFetch(domain:registry.modelcontextprotocol.io)"
+      "WebFetch(domain:registry.modelcontextprotocol.io)",
+      "Bash(gh repo *)",
+      "WebFetch(domain:github.com)"
     ]
   }
 }
