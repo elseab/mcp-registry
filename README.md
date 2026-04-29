@@ -2,7 +2,7 @@
 
 This repository hosts the **organization‑approved Model Context Protocol (MCP) registry** used by GitHub Copilot.
 
-The registry defines **which MCP servers GitHub Copilot is allowed to use** within the organization, ensuring that Copilot’s access to internal and third‑party systems is **explicitly approved, centrally controlled, and auditable**.
+The registry defines **which MCP servers GitHub Copilot is allowed to use** within the organization, ensuring that Copilot's access to internal and third‑party systems is **explicitly approved, centrally controlled, and auditable**.
 
 ---
 
@@ -15,7 +15,7 @@ This repository exists to:
 
 - ✅ Enforce a **central allow‑list** of MCP servers
 - ✅ Prevent users from configuring arbitrary or untrusted MCP servers
-- ✅ Ensure Copilot can only security‑reviewed and approved
+- ✅ Ensure Copilot can only use security‑reviewed and approved integrations
 - ✅ Provide a clear, version‑controlled audit trail of allowed integrations
 
 This registry is referenced from **GitHub Organization → Copilot settings**, where MCP access is restricted to the servers defined here.
@@ -24,13 +24,24 @@ This registry is referenced from **GitHub Organization → Copilot settings**, w
 
 ## How it works
 
-- `registry.json` contains the list of **approved MCP servers**
-- GitHub Copilot is configured to:
-  - Use this registry URL
-  - Reject any MCP servers not listed here
-- All Copilot clients (CLI, VS Code, Coding Agent, etc.) inherit this policy automatically
+The registry exposes a single endpoint that GitHub Copilot queries to enforce the allow-list:
 
-No secrets, credentials, or access tokens are stored in this repository.
+| Endpoint | Source file |
+|---|---|
+| `GET /v0.1/servers` | `v0.1/servers-list.json` |
+
+URL rewriting (configured in `staticwebapp.config.json` or `_redirects`) maps the API path to the static JSON file.
+
+---
+
+## Hosting and deployment
+
+The registry must be served over HTTPS with CORS headers. Two hosting configurations are included:
+
+- **Azure Static Web Apps** — uses `staticwebapp.config.json` (recommended for Microsoft/Azure environments)
+- **Netlify** — uses `_redirects`
+
+Configure the GitHub Copilot organization policy to point to the base URL of the deployed site (e.g. `https://your-registry.azurestaticapps.net`). Do **not** include the `/v0.1/servers` path suffix — Copilot appends this automatically.
 
 ---
 
@@ -38,16 +49,24 @@ No secrets, credentials, or access tokens are stored in this repository.
 
 The current registry intentionally contains a **minimal set** of MCP servers.
 
-Typical approved servers include:
-- Official vendor‑managed MCP servers (e.g. Atlassian Confluence MCP)
-- Internally hosted MCP servers that have passed security review
+### atlassian-confluence
 
-Each entry specifies:
-- Server identity and description
-- Connection type (HTTP)
-- Authentication method (OAuth where possible)
+- **Title:** Atlassian Confluence MCP
+- **URL:** `https://mcp.atlassian.com`
+- **Transport:** Streamable HTTP
+- **Auth:** OAuth 2.0 (Bearer token — users authenticate via Atlassian OAuth)
+- **Purpose:** Read and write access to Confluence spaces, pages, and content
 
-Actual authorization and access control are enforced **by the target system itself** (for example, Confluence permissions).
+---
+
+## File structure
+
+```
+v0.1/
+  servers-list.json          ← GET /v0.1/servers
+staticwebapp.config.json     ← Azure SWA routing + CORS headers
+_redirects                   ← Netlify routing rules
+```
 
 ---
 
@@ -71,7 +90,7 @@ Making this repository public is intentional and safe:
 
 ## Governance and change management
 
-Changes to `registry.json` must follow the organization’s security review process.
+Changes to the registry must follow the organization's security review process.
 
 Recommended practices:
 - Pull requests required
@@ -81,16 +100,15 @@ Recommended practices:
 
 ---
 
-## Adding or updating an MCP server
+## Adding a new MCP server
 
-1. Open a pull request modifying `registry.json`
-2. Include:
+1. Add the server entry to `v0.1/servers-list.json` under the `servers` array and increment `metadata.count`
+2. Open a pull request including:
    - Purpose of the MCP server
    - Data accessed
    - Authentication method
    - Security and compliance review reference
-3. Obtain required approvals
-4. Merge to make the server available to Copilot users
+5. Obtain required approvals and merge
 
 ---
 
@@ -117,6 +135,6 @@ For questions, or to request a new MCP server to be added, contact:
 
 ## References
 
-- GitHub Copilot MCP documentation  
-- Model Context Protocol (MCP) specification  
-- Internal security and data‑handling policies
+- [Configure MCP server access — GitHub Docs](https://docs.github.com/en/copilot/how-tos/administer-copilot/manage-mcp-usage/configure-mcp-server-access)
+- [Configure MCP registry — GitHub Docs](https://docs.github.com/en/copilot/how-tos/administer-copilot/manage-mcp-usage/configure-mcp-registry)
+- [MCP Registry specification — modelcontextprotocol.io](https://registry.modelcontextprotocol.io/docs)

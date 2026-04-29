@@ -1,0 +1,4 @@
+# Netlify URL rewriting rules
+# See: https://docs.netlify.com/routing/redirects/
+
+/v0.1/servers  /v0.1/servers-list.json  200
